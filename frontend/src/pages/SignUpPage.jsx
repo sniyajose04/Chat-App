@@ -1,7 +1,10 @@
 import React from "react";
 import { useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
-import { User, MessageSquare, EyeOff, Eye, Lock, Mail } from "lucide-react";
+import { User, Lock, Mail, Eye, EyeOff, MessageSquare, Loader2 } from "lucide-react";
+import { Link } from "react-router-dom";
+import AuthImagePattern from "../components/AuthImagePattern";
+import toast from "react-hot-toast"
 
 const SignUpPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -10,14 +13,25 @@ const SignUpPage = () => {
     email: "",
     password: "",
   });
-
+  
   const { signup, isSigningUp } = useAuthStore();
 
-  const validateForm = () => {};
+  const validateForm = () => {
+    if (!formData.fullName.trim()) return toast.error("Full name is required");
+    if (!formData.email.trim()) return toast.error("Email is required");
+    if (!/\S+@\S+\.\S+/.test(formData.email)) return toast.error("Invalid email format");
+    if (!formData.password) return toast.error("Password is required");
+    if (formData.password.length < 6) return toast.error("Password must be at least 6 characters");
+    return true;
+  };
+  
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const success = validateForm();
+    if(success===true) signup(formData)
   };
+  
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
@@ -65,10 +79,11 @@ const SignUpPage = () => {
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Mail className="size-5 text-base-content/40" />
                 </div>
+                
                 <input
                   type="email"
                   className={`input input-bordered w-full pl-10`}
-                  placeholder="you@exmaple.com"
+                  placeholder="you@example.com"
                   value={formData.email}
                   onChange={(e) =>
                     setFormData({ ...formData, email: e.target.value })
@@ -83,7 +98,7 @@ const SignUpPage = () => {
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="size-5 text-base-content/40" />
+                  <Lock className="size-5 text-base-content/40"/>
                 </div>
                 <input
                   type={showPassword ? "text" : "password"}
@@ -108,28 +123,41 @@ const SignUpPage = () => {
               </div>
             </div>
 
-             <button type="submit" className="btn btn-primary w-full" disabled={isSigningUp}>
+            <button
+              type="submit"
+              className="btn btn-primary w-full"
+              disabled={isSigningUp}
+            >
               {isSigningUp ? (
                 <>
-                <Loader2 className="size-5 animate-spin" />
-                Loading...
+                  <Loader2 className="size-5 animate-spin" />
+                  Loading...
                 </>
-              ):(
+              ) : (
                 "Create Account"
               )}
-              </button>     
+            </button>
           </form>
 
           <div className="text-center">
             <p className="text-base-content/60">
-            Already have an Account?{" "}
+              Already have an Account?{" "}
               <Link to="/login" className="link link-primary">
-              Sign in 
+                Sign in
               </Link>
             </p>
           </div>
         </div>
       </div>
+
+              {/* right side */}
+
+              <AuthImagePattern
+              title = "Join our community"
+              subtitle = "Connect with friends,share,and stay in touch with you"
+              />
+
+
     </div>
   );
 };
